@@ -1,31 +1,54 @@
 #!/bin/bash
 
-mkdir -p /var/www/html
+# Wait for services to initialize
+sleep 20
 
+# Create necessary directories
+mkdir -p /var/www/html
+mkdir -p /run/php
+
+# Move to the HTML directory
 cd /var/www/html
 
-rm -rf *
-
+# Download WP CLI
 curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 
+# Set permissions and move it to a global location
 chmod 744 wp-cli.phar
 
 mv wp-cli.phar /usr/local/bin/wp
 
-wp core download --allow-root
+sed -i 's|^listen =.*|listen = wordpress:9000|' /etc/php/7.4/fpm/pool.d/www.conf
 
-sleep 10
+# Download WordPress core files
+wp core download --allow-root --path='/var/www/html'
 
-mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+# Create wp-config file by moving the sample file
 
-# mv /wp-config.php /var/www/html/wp-config.php
+mv wp-config-sample.php wp-config.php
 
-wp config set DB_NAME 'Lme3win' --allow-root
+# sleep infinity
+# Set up WordPress configuration with environment variables
 
-wp config set DB_USER 'mo7al2ostora' --allow-root
+wp config set DB_NAME $SQL_DATABASE --allow-root --path='/var/www/html'
+wp config set DB_USER $MYSQL_USER --allow-root --path='/var/www/html'
+wp config set DB_PASSWORD $MYSQL_PASSWORD --allow-root --path='/var/www/html'
+wp config set DB_HOST 'mariadb:3306' --allow-root --path='/var/www/html'
 
-wp config set DB_PASSWORD '91' --allow-root
 
-# wp config set DB_HOST 'mariadb:3306' --allow-root --path='/var/www/wordpress' ; check the path is exist;
+# sleep infinity
 
-# wp core install --url=porn.ma --title=oPPo --admin_user=momihamm --admin_password=91 --admin_email=$momihamm@1337.ma --skip-email --allow-root ; Error: Error establishing a database connection. This either means that the username and password information in your `wp-config.php` file is incorrect or that contact with the database server at `localhost` could not be established. This could mean your host’s database server is down.
+# Install WordPress using environment variables
+wp core install \
+  --url=$DOMAIN_NAME \
+  --title=$WP_TITLE \
+  --admin_user=$WP_ADMIN_USR \
+  --admin_password=$WP_ADMIN_PWD \
+  --admin_email=$WP_ADMIN_EMAIL \
+  --skip-email \
+  --allow-root \
+  --path='/var/www/html'
+
+# Start PHP FastCGI Process Manager
+
+/usr/sbin/php-fpm7.3 -F

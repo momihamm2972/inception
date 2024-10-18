@@ -1,19 +1,21 @@
 #! /bin/bash
 
+# Start the MariaDB service
 service mariadb start
 
-sleep 5
+# Wait for the database service to be up
+sleep 10
 
-mysql -e "Create or Replace Database "Lme3win""
+# Create or replace the database
+mysql -e "CREATE DATABASE IF NOT EXISTS $SQL_DATABASE;"
 
-mysql -e "CREATE USER IF NOT EXISTS 'momihamm'@'localhost' IDENTIFIED BY '91';"
+# Create the user with a password (or recreate it)
+mysql -e "CREATE USER IF NOT EXISTS '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';"
 
-mysql -e "GRANT ALL PRIVILEGES ON "Lme3win".* TO 'momihamm@1337.ma' IDENTIFIED BY '91';"
+# Grant all privileges to the user on the specified database
+mysql -e "GRANT ALL PRIVILEGES ON $SQL_DATABASE.* TO '$MYSQL_USER'@'%';"
 
-mysql -e "ALTER USER 'momihamm'@'localhost' IDENTIFIED BY '91';"
-
+# Flush privileges to apply changes
 mysql -e "FLUSH PRIVILEGES;"
-
-mysqladmin -u root -p91 shutdown
 
 exec mysqld_safe

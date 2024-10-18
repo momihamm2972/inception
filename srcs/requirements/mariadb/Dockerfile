@@ -2,8 +2,10 @@ FROM debian:bullseye
 
 RUN apt update -y && apt-get install mariadb-server -y
 
-COPY ./tools/script.sh /home/script.sh
+COPY conf/50-server.cnf	/etc/mysql/mariadb.conf.d/50-server.cnf
 
-RUN chmod 744 /home/script.sh
+COPY ./tools/script.sh .
 
-CMD [ "./home/script.sh" ]
+RUN chmod +x script.sh
+
+CMD [ "./script.sh" ]

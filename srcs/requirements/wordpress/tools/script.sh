@@ -49,6 +49,8 @@ wp core install \
   --allow-root \
   --path='/var/www/html'
 
+wp user create $WP_USR $WP_USER_EMAIL --role=author --user_pass=$WP_USER_PASSWORD --allow-root --path=/var/www/html
+
 # Start PHP FastCGI Process Manager
 
-/usr/sbin/php-fpm7.3 -F
+/usr/sbin/php-fpm7.4 -F
